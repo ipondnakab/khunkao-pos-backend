@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "module": "commonjs",
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "outDir": "./dist",
+        "sourceMap": true,
+        "strict": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strictPropertyInitialization": false,
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
+        "baseUrl": "src",
+        "paths": {
+            "@/*": ["*"]
+        }
+    },
+    "compileOnSave": true,
+    "include": ["src"]
+}

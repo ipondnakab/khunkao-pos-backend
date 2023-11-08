@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+    # Mongodb service
+    mongo_db:
+        ports:
+            # local->container
+            - 27017:27017
+        container_name: db_container
+        image: mongo:latest
+        restart: always
+        volumes:
+            - mongo_data:/data/db
+
+    # Node api service
+    api:
+        build:
+            dockerfile: Dockerfile
+            context: .
+            args:
+                - STAGE=local
+        ports:
+            # local->container
+            - 8081:8080
+        environment:
+            PORT: 8080
+            MONGODB_URI: mongodb://mongo_db:27017
+            DB_NAME: khunkao-pos
+        depends_on:
+            - mongo_db
+
+volumes:
+    mongo_data: {}
