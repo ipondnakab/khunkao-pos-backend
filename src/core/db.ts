@@ -11,7 +11,7 @@ export class Database {
     static async getInstance(): Promise<Mongoose> {
         if (!Database.instance) {
             Database.instance = await mongoose.connect(
-                'mongodb://localhost:27017/test',
+                'mongodb://localhost:27017/khunkao-pos',
             );
         }
         return Database.instance;
