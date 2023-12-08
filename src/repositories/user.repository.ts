@@ -1,12 +1,12 @@
 import { SystemException, Trace } from '@/core/errors';
 import { ActiveStatus } from '@/enums/activeStatus.enum';
-import userSchema, { UserInterface } from '@/models/user.model';
+import userSchema, { UserDocument, UserInterface } from '@/models/user.model';
 import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 
 export const userRepo = mongoose.model('User', userSchema);
 
-export const getAllInactive = async () => {
+const getAllInactive = async () => {
     try {
         const users = await userRepo.find(
             { status: ActiveStatus.INACTIVE },
@@ -15,15 +15,40 @@ export const getAllInactive = async () => {
         return users;
     } catch (error) {
         const err = error as mongoose.Error;
+        let statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+        switch (err.name) {
+            case 'CastError':
+                statusCode = StatusCodes.BAD_REQUEST;
+                break;
+            case 'ValidationError':
+                statusCode = StatusCodes.BAD_REQUEST;
+                break;
+            case 'MongoError':
+                statusCode = StatusCodes.BAD_REQUEST;
+                break;
+            case 'DocumentNotFoundError':
+                statusCode = StatusCodes.NOT_FOUND;
+                break;
+            case 'ObjectParameterError':
+                statusCode = StatusCodes.BAD_REQUEST;
+                break;
+            case 'ObjectExpectedError':
+                statusCode = StatusCodes.BAD_REQUEST;
+                break;
+            default:
+                break;
+        }
+
         throw new SystemException({
             trace: Trace.REPOSITORY,
             message: err.message,
-            statusCode: 500,
+            statusCode: statusCode,
+            error: err.name,
         });
     }
 };
 
-export const getAllActive = async () => {
+const getAllActive = async () => {
     try {
         const users = await userRepo.find(
             { status: ActiveStatus.ACTIVE },
@@ -36,11 +61,12 @@ export const getAllActive = async () => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getAll = async () => {
+const getAll = async () => {
     try {
         const users = await userRepo.find({}, { password: 0 });
         return users;
@@ -50,11 +76,12 @@ export const getAll = async () => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getById = async (id: mongoose.Types.ObjectId) => {
+const getById = async (id: mongoose.Types.ObjectId) => {
     try {
         const user = await userRepo.findById(id, { password: 0 });
         if (!user || user.status === ActiveStatus.INACTIVE) {
@@ -71,13 +98,40 @@ export const getById = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const create = async (data: UserInterface) => {
+const getByPhoneOrEmail = async (username: string) => {
     try {
-        const user = await userRepo.create(data);
+        const user: UserDocument = await userRepo.findOne({
+            $or: [{ phone: username }, { email: username }],
+        });
+        if (!user || user.status === ActiveStatus.INACTIVE) {
+            throw new SystemException({
+                trace: Trace.REPOSITORY,
+                message: 'User not found',
+                statusCode: StatusCodes.NOT_FOUND,
+            });
+        }
+        return user;
+    } catch (error) {
+        const err = error as mongoose.Error;
+        throw new SystemException({
+            trace: Trace.REPOSITORY,
+            message: err.message,
+            statusCode: 500,
+            error: err.name,
+        });
+    }
+};
+
+const create = async (data: UserInterface) => {
+    try {
+        const user: UserDocument = (await userRepo.create<UserInterface>(
+            data,
+        )) as UserDocument;
         user.password = undefined;
         return user.toObject();
     } catch (error) {
@@ -86,11 +140,15 @@ export const create = async (data: UserInterface) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const update = async (id: mongoose.Types.ObjectId, data: Partial<UserInterface>) => {
+const update = async (
+    id: mongoose.Types.ObjectId,
+    data: Partial<UserInterface>,
+) => {
     // not allow update phone
     delete data.phone;
 
@@ -114,11 +172,12 @@ export const update = async (id: mongoose.Types.ObjectId, data: Partial<UserInte
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const remove = async (id: mongoose.Types.ObjectId) => {
+const remove = async (id: mongoose.Types.ObjectId) => {
     try {
         const user = await userRepo.findById(id);
         if (!user || user.status === ActiveStatus.INACTIVE) {
@@ -137,6 +196,7 @@ export const remove = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
@@ -149,4 +209,5 @@ export default {
     create,
     update,
     remove,
+    getByPhoneOrEmail,
 };

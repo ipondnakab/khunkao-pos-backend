@@ -16,7 +16,8 @@
         "baseUrl": "src",
         "paths": {
             "@/*": ["*"]
-        }
+        },
+        "types": ["mongoose"]
     },
     "compileOnSave": true,
     "include": ["src"]

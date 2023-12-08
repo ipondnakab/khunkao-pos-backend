@@ -1,4 +1,4 @@
-import * as shopRepository from '@/repositories/shop.repository';
+import shopRepository from '@/repositories/shop.repository';
 import { SystemException, Trace } from '@/core/errors';
 import { ActiveStatus } from '@/enums/activeStatus.enum';
 import categorySchema, { CategoryInterface } from '@/models/category.model';
@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 
 export const categoryRepo = mongoose.model('Category', categorySchema);
 
-export const getAll = async () => {
+const getAll = async () => {
     try {
         const categories = await categoryRepo.find().populate('menus');
         return categories;
@@ -16,11 +16,12 @@ export const getAll = async () => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getById = async (id: mongoose.Types.ObjectId) => {
+const getById = async (id: mongoose.Types.ObjectId) => {
     try {
         const category = await categoryRepo.findById(id).populate('menus');
         if (!category || category.status === ActiveStatus.INACTIVE) {
@@ -37,11 +38,12 @@ export const getById = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getByShopId = async (id: mongoose.Types.ObjectId) => {
+const getByShopId = async (id: mongoose.Types.ObjectId) => {
     try {
         const categories = await categoryRepo
             .find({
@@ -55,11 +57,12 @@ export const getByShopId = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const create = async (
+const create = async (
     shopId: mongoose.Types.ObjectId,
     data: CategoryInterface,
 ) => {
@@ -75,14 +78,12 @@ export const create = async (
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const update = async (
-    id: mongoose.Types.ObjectId,
-    data: CategoryInterface,
-) => {
+const update = async (id: mongoose.Types.ObjectId, data: CategoryInterface) => {
     try {
         const category = await categoryRepo.findById(id);
         if (!category || category.status === ActiveStatus.INACTIVE) {
@@ -101,11 +102,12 @@ export const update = async (
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const remove = async (id: mongoose.Types.ObjectId) => {
+const remove = async (id: mongoose.Types.ObjectId) => {
     try {
         const category = await categoryRepo.findById(id);
         if (!category || category.status === ActiveStatus.INACTIVE) {
@@ -124,6 +126,16 @@ export const remove = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
+};
+
+export default {
+    getAll,
+    getById,
+    getByShopId,
+    create,
+    update,
+    remove,
 };

@@ -37,7 +37,6 @@ export const shopSchemaValidate = z.object({
         name: z.string(),
         shopSymbol: z.string(),
         description: z.string().optional(),
-        owner: z.string(),
         urlImages: z.array(z.string()).optional(),
         urlLogoImage: z.string().optional(),
         staffs: z.array(z.string()).optional(),
@@ -57,6 +56,8 @@ export interface ShopInterface {
     staffs: string[];
     managers: string[];
     deletedAt: Date;
+    status: ActiveStatus;
+    tables: string[];
 }
 
 export interface ShopDocument extends ShopInterface, mongoose.Document {}

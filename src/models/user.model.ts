@@ -25,9 +25,16 @@ export const userSchemaValidate = z.object({
         email: z.string().email(),
         firstName: z.string(),
         lastName: z.string(),
-        password: z.string().min(6),
+        password: z.string(),
         phone: z.string().length(10).startsWith('0'),
         status: z.nativeEnum(ActiveStatus).optional(),
+    }),
+});
+
+export const userSchemaLoginValidate = z.object({
+    body: z.object({
+        password: z.string(),
+        username: z.string(),
     }),
 });
 
@@ -38,6 +45,7 @@ export interface UserInterface {
     phone: string;
     deletedAt: Date;
     status: ActiveStatus;
+    password: string | undefined;
 }
 
 export interface UserDocument extends UserInterface, mongoose.Document {}

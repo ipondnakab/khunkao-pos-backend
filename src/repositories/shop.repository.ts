@@ -1,6 +1,6 @@
 import { SystemException, Trace } from '@/core/errors';
 import { ActiveStatus } from '@/enums/activeStatus.enum';
-import shopSchema, { ShopInterface } from '@/models/shop.model';
+import shopSchema, { ShopDocument, ShopInterface } from '@/models/shop.model';
 import mongoose from 'mongoose';
 
 const shopRepo = mongoose.model('Shop', shopSchema);
@@ -31,7 +31,7 @@ const populateProps = [
     },
 ];
 
-export const getAll = async () => {
+const getAll = async () => {
     try {
         const shops = await shopRepo.find().populate(populateProps).exec();
         return shops;
@@ -41,11 +41,12 @@ export const getAll = async () => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getAllActive = async () => {
+const getAllActive = async () => {
     try {
         const shops = await shopRepo
             .find({ status: ActiveStatus.ACTIVE })
@@ -58,11 +59,12 @@ export const getAllActive = async () => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getAllInactive = async () => {
+const getAllInactive = async () => {
     try {
         const shops = await shopRepo
             .find({ status: ActiveStatus.INACTIVE })
@@ -75,11 +77,12 @@ export const getAllInactive = async () => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getByOwnerId = async (id: mongoose.Types.ObjectId) => {
+const getByOwnerId = async (id: mongoose.Types.ObjectId) => {
     try {
         const shops = await shopRepo
             .find({
@@ -95,11 +98,12 @@ export const getByOwnerId = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getShopBySymbol = async (shopSymbol: string) => {
+const getShopBySymbol = async (shopSymbol: string) => {
     try {
         const shop = await shopRepo
             .findOne({
@@ -114,13 +118,14 @@ export const getShopBySymbol = async (shopSymbol: string) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getByUserId = async (id: mongoose.Types.ObjectId) => {
+const getByUserId = async (id: mongoose.Types.ObjectId) => {
     try {
-        const shops = await shopRepo
+        const shops: ShopDocument[] = await shopRepo
             .find({
                 $or: [
                     { owner: id },
@@ -145,13 +150,14 @@ export const getByUserId = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getById = async (id: mongoose.Types.ObjectId) => {
+const getById = async (id: mongoose.Types.ObjectId) => {
     try {
-        const shop = await shopRepo.findById(id).populate(populateProps);
+        const shop: ShopDocument = await shopRepo.findById(id).populate(populateProps);
         if (!shop || shop.status === ActiveStatus.INACTIVE) {
             throw new SystemException({
                 trace: Trace.REPOSITORY,
@@ -166,11 +172,12 @@ export const getById = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const create = async (data: ShopInterface) => {
+const create = async (data: ShopInterface) => {
     try {
         const shop = await shopRepo.create(data);
         return shop;
@@ -180,14 +187,12 @@ export const create = async (data: ShopInterface) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const update = async (
-    id: mongoose.Types.ObjectId,
-    data: ShopInterface,
-) => {
+const update = async (id: mongoose.Types.ObjectId, data: ShopInterface) => {
     try {
         const shop = await shopRepo.findById(id);
         if (!shop || shop.status === ActiveStatus.INACTIVE) {
@@ -206,11 +211,12 @@ export const update = async (
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const remove = async (id: mongoose.Types.ObjectId) => {
+const remove = async (id: mongoose.Types.ObjectId) => {
     try {
         const shop = await shopRepo.findById(id);
         if (!shop || shop.status === ActiveStatus.INACTIVE) {
@@ -229,6 +235,7 @@ export const remove = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };

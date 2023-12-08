@@ -2,11 +2,11 @@ import { SystemException, Trace } from '@/core/errors';
 import { ActiveStatus } from '@/enums/activeStatus.enum';
 import menuSchema, { MenuInterface } from '@/models/menu.modal';
 import mongoose from 'mongoose';
-import * as categoryRepository from './category.repository';
+import categoryRepository from './category.repository';
 
 export const menuRepository = mongoose.model('Menu', menuSchema);
 
-export const getAll = async () => {
+const getAll = async () => {
     try {
         const menus = await menuRepository.find();
         menus;
@@ -16,11 +16,12 @@ export const getAll = async () => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getById = async (id: mongoose.Types.ObjectId) => {
+const getById = async (id: mongoose.Types.ObjectId) => {
     try {
         const menu = await menuRepository.findById(id);
         if (!menu) {
@@ -37,11 +38,12 @@ export const getById = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const getByCategoryId = async (id: mongoose.Types.ObjectId) => {
+const getByCategoryId = async (id: mongoose.Types.ObjectId) => {
     try {
         const menus = await menuRepository.find({
             category: id,
@@ -53,11 +55,12 @@ export const getByCategoryId = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const create = async (
+const create = async (
     categoryId: mongoose.Types.ObjectId,
     data: MenuInterface,
 ) => {
@@ -73,11 +76,12 @@ export const create = async (
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const update = async (
+const update = async (
     id: mongoose.Types.ObjectId,
     data: Partial<MenuInterface>,
 ) => {
@@ -99,11 +103,12 @@ export const update = async (
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };
 
-export const remove = async (id: mongoose.Types.ObjectId) => {
+const remove = async (id: mongoose.Types.ObjectId) => {
     try {
         const menu = await menuRepository.findById(id);
         if (!menu) {
@@ -122,6 +127,7 @@ export const remove = async (id: mongoose.Types.ObjectId) => {
             trace: Trace.REPOSITORY,
             message: err.message,
             statusCode: 500,
+            error: err.name,
         });
     }
 };

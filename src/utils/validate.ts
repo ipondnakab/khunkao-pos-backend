@@ -31,7 +31,7 @@ export const validateObjectId = (id: string) => {
             statusCode: StatusCodes.BAD_REQUEST,
         });
     }
-    return id as unknown as mongoose.Types.ObjectId;
+    return new mongoose.Types.ObjectId(id);
 };
 
 export const translate = (error: ZodIssue[]): string => {
