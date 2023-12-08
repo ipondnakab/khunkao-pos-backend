@@ -35,12 +35,7 @@ export const getFile = async (
 ) => {
     try {
         const { filename } = req.params;
-
         const gfs = Database.getGfs();
-
-        // eslint-disable-next-line no-console
-        console.log({ filename });
-
         const file = await gfs.files.findOne({
             $or: [{ filename }, { _id: filename }],
         });
